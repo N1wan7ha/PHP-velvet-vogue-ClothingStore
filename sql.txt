@@ -1,0 +1,114 @@
+-- Velvet Vogue E-Commerce Database Schema
+
+-- Users Table
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    phone VARCHAR(20),
+    address_line1 VARCHAR(255),
+    address_line2 VARCHAR(255),
+    city VARCHAR(100),
+    state VARCHAR(100),
+    postal_code VARCHAR(20),
+    country VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL
+);
+
+-- Products Table
+CREATE TABLE products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    category VARCHAR(100),
+    subcategory VARCHAR(100),
+    brand VARCHAR(100),
+    stock_quantity INT NOT NULL,
+    color VARCHAR(50),
+    size VARCHAR(20),
+    material VARCHAR(100),
+    image_url VARCHAR(255),
+    is_featured BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Orders Table
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    shipping_method VARCHAR(100),
+    shipping_address VARCHAR(255),
+    billing_address VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Order Items Table
+CREATE TABLE order_items (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT NOT NULL,
+    price_at_time DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Cart Table
+CREATE TABLE cart (
+    cart_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    product_id INT,
+    quantity INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Product Reviews Table
+CREATE TABLE product_reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    user_id INT,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    review_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Insert Sample Data
+
+-- Sample Users
+INSERT INTO users (first_name, last_name, email, password_hash, phone, address_line1, city, state, postal_code, country) VALUES
+('Emma', 'Johnson', 'emma.johnson@email.com', '$2y$10$randomhashvalue123', '+1-555-123-4567', '123 Fashion Street', 'New York', 'NY', '10001', 'United States'),
+('Michael', 'Smith', 'michael.smith@email.com', '$2y$10$randomhashvalue456', '+1-555-987-6543', '456 Style Avenue', 'Los Angeles', 'CA', '90001', 'United States');
+
+-- Sample Products
+INSERT INTO products (name, description, price, category, subcategory, brand, stock_quantity, color, size, material, is_featured) VALUES
+('Silk Evening Gown', 'Elegant silk gown perfect for formal events', 299.99, 'Dresses', 'Evening Wear', 'Velvet Vogue', 50, 'Deep Blue', 'M', 'Silk', TRUE),
+('Classic Leather Jacket', 'Timeless leather jacket with modern cut', 249.99, 'Outerwear', 'Jackets', 'Urban Edge', 75, 'Black', 'L', 'Genuine Leather', TRUE),
+('Cashmere Sweater', 'Soft and warm cashmere sweater', 179.99, 'Knitwear', 'Sweaters', 'Luxury Knits', 100, 'Camel', 'S/M', 'Cashmere', FALSE);
+
+-- Sample Orders
+INSERT INTO orders (user_id, total_amount, status, shipping_method, shipping_address) VALUES
+(1, 299.99, 'processing', 'Express Shipping', '123 Fashion Street, New York, NY 10001'),
+(2, 249.99, 'shipped', 'Standard Shipping', '456 Style Avenue, Los Angeles, CA 90001');
+
+-- Sample Order Items
+INSERT INTO order_items (order_id, product_id, quantity, price_at_time) VALUES
+(1, 1, 1, 299.99),
+(2, 2, 1, 249.99);
+
+-- Sample Product Reviews
+INSERT INTO product_reviews (product_id, user_id, rating, review_text) VALUES
+(1, 1, 5, 'Absolutely stunning gown! Perfect fit and amazing quality.'),
+(2, 2, 4, 'Great leather jacket, very comfortable and stylish.');
